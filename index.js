@@ -1,4 +1,4 @@
-const Tmpl = require('blue-tmpl');
+const BlueTmpl = require('blue-tmpl');
 
 const fs = require('fs');
 
@@ -15,7 +15,7 @@ module.exports = (opts) => {
     opts.app.engine(_opts.ext, (filePath, state, callback) => {
       fs.readFile(filePath, 'utf8', function (err, content) {
         if (err) return callback(new Error(err));
-        return callback(null, new Tmpl({
+        return callback(null, new BlueTmpl({
           template: content,
         }).render(state).template);
       })
@@ -24,15 +24,20 @@ module.exports = (opts) => {
     //配置koa2的模板
     return function (ctx, next) {
       if (ctx.render) return next();
-      ctx.app.context.render = function (_path, data, __opts = {}) {
+      ctx.app.context.render = function (_path = "", data = {}) {
         return new Promise((resolve) => {
           fs.readFile(path.join(ROOT_PATH, opts.path, _path + `.${_opts.ext}`), 'utf8', (err, content) => {
             if (err) {
               this.body = err;
             } else {
-              this.body = new Tmpl({
-                template: content,
-              }).render(Object.assign(data, __opts)).template;
+              try{
+                BlueTmpl.prototype.$ctx = this;
+                this.body = new BlueTmpl({
+                  template: content,
+                }).render(data).template;
+              }catch(e){
+                this.body = e;
+              }
             }
             resolve();
           });
