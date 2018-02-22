@@ -1,6 +1,6 @@
 {
   "name": "blue-tmpl-views",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "blut-tmpl-views in express or koa2",
   "main": "index.js",
   "contributors": [
